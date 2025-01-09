@@ -1,13 +1,24 @@
 package com.example.newproj.order.service;
 
 import com.example.newproj.order.dao.OrderDao;
+import com.example.newproj.order.dto.userDto;
 import com.example.newproj.order.model.Order;
 import com.example.newproj.order.model.OrderRequest;
 import com.example.newproj.order.model.ProductEntity;
 import com.example.newproj.order.model.ProductRequest;
+import com.example.newproj.util.ResponseBean;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.DataInput;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -18,26 +29,37 @@ public class OrderService {
         this.orderDao = orderDao;
     }
 
-    public ResponseEntity<?> saveOrder(OrderRequest orderRequest) throws Exception {
-        int s = orderDao.fetchUserId(orderRequest.getUserId());
-        if (!(s > 0)) {
-            throw new Exception("user not found with Id: " + s);
+    @Transactional
+    public ResponseBean<Object> saveOrder(OrderRequest orderRequest) throws Exception {
+//        int s = orderDao.fetchUserId(orderRequest.getUserId());
+
+        userDto userD = orderDao.fetchUserDto(orderRequest.getUserId());
+        if (!(userD.getUserId() > 0)) {
+            throw new Exception("user not found with Id: " + userD.getUserId());
         }
 
-
         RestTemplate restTemplate = new RestTemplate();
-        String url = "";
+        String url = "http://192.168.29.28:8080/inventory/validate-product";
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<Object> productRequestHttpEntity = new HttpEntity<>(orderRequest, headers);
+        ResponseEntity<String> responseEntity;
+try {
+   responseEntity = restTemplate.postForEntity(url, productRequestHttpEntity, String.class);
+}catch (HttpClientErrorException e){
+    ObjectMapper objectMapper = new ObjectMapper();
+   ResponseBean responseBean = objectMapper.readValue(e.getResponseBodyAs(String.class),ResponseBean.class);
 
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, productRequestHttpEntity, String.class);
 
-        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+    return new ResponseBean<>(HttpStatus.BAD_REQUEST, responseBean.getDisplayMessage(), null, null);
+
+
+}
+        /*if (!responseEntity.getStatusCode().is2xxSuccessful()) {
             return new ResponseBean<>(HttpStatus.BAD_REQUEST, responseEntity.getBody(), responseEntity.getBody(), null);
-        }
+        }*/
 
 
         // If it is true then... Write query code to insert
@@ -45,9 +67,11 @@ public class OrderService {
         int totalAmount = 0;
         Order order = new Order();
 
-        String userName = orderDao.fetchUserName(orderRequest.getUserId());
+//        String userName = orderDao.fetchUserName(orderRequest.getUserId());
+
         String productName = orderDao.fetchProductName(orderRequest.getUserId());
 
+        List<ProductEntity> productEntityList = new ArrayList<>();
         for (ProductRequest productRequest : orderRequest.getProducts()) {
 
             String price = orderDao.getPrice(productRequest.getProductId());
@@ -63,22 +87,24 @@ public class OrderService {
 
             totalAmount = totalAmount + (productEntity.getPrice() * productRequest.getQuantity());
 
-            order.getProductEntities().add(productEntity);
+            productEntityList.add(productEntity);
+
+
         }
+        order.setProductEntities(productEntityList);
         order.setUserId(orderRequest.getUserId());
         order.setTotalAmount(totalAmount);
-        order.setUserName(userName);
+        order.setUserName(userD.getUserName());
         order.setStatus("Pending");
 
         // pay
         //if payment is successful order insert and minus qty from the inventory
 
-       orderDao.insertIntoOrder(order,totalAmount);
+        int i = orderDao.insertIntoOrder(order, totalAmount);
 
+//        order.setId(i);
 
-
-
-        return null;
+        return new ResponseBean<>(HttpStatus.OK, i);
 
     }
 
@@ -111,11 +137,11 @@ public class OrderService {
 
     }*/
 
-    public ResponseEntity<?> inventoryUpdate(OrderRequest orderRequest) throws Exception {
+//    public ResponseEntity<?> inventoryUpdate(OrderRequest orderRequest) throws Exception {
 
 
 
 
-    }
+
 
 }

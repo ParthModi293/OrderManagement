@@ -2,6 +2,7 @@ package com.example.newproj.order.controller;
 
 import com.example.newproj.order.model.OrderRequest;
 import com.example.newproj.order.service.OrderService;
+import com.example.newproj.util.ResponseBean;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,15 +21,15 @@ public class OrderController {
     @PostMapping("/save")
     public ResponseEntity<?> saveOrder(@RequestBody OrderRequest orderRequest) throws Exception {
 
-            orderService.saveOrder(orderRequest);
+        ResponseBean<Object> objectResponseBean = orderService.saveOrder(orderRequest);
+//        objectResponseBean.setDisplayMessage("Order saved successfully");
 
-            return ResponseEntity.ok().build();
+        return ResponseEntity.ok(objectResponseBean);
 
     }
 
-    public ResponseEntity<?> paymentRequest(@RequestBody OrderRequest orderRequest) throws Exception {
 
-        return null;
-    }
+
+
 
 }

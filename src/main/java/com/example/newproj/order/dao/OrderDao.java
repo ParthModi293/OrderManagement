@@ -1,14 +1,19 @@
 package com.example.newproj.order.dao;
 
+import com.example.newproj.order.dto.userDto;
 import com.example.newproj.order.model.Order;
+import com.example.newproj.order.model.ProductEntity;
 import com.example.newproj.util.SqlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -32,8 +37,10 @@ public class OrderDao {
     }*/
 
 
-    public void insertIntoOrder(Order order, double totalAmount) throws JsonProcessingException {
-        String orderInsertSql = "INSERT INTO order (user_name,product,user_id, total_amount,status) VALUES (:userName, :product ::json, :userId, :totalAmount, :status)";
+    public int insertIntoOrder(Order order, double totalAmount) throws JsonProcessingException {
+        String orderInsertSql = "INSERT INTO `order` (user_name, product, user_id, total_amount, status) " +
+                "VALUES (:userName, CAST(:product AS JSON), :userId, :totalAmount, :status)";
+
         Map<String, Object> orderParams = new HashMap<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -43,10 +50,36 @@ public class OrderDao {
         orderParams.put("status", order.getStatus());
         orderParams.put("totalAmount", totalAmount);
 
-        sqlUtil.persist(orderInsertSql, new MapSqlParameterSource(orderParams));
+        return sqlUtil.persistKey(orderInsertSql, new MapSqlParameterSource(orderParams));
+    }
+
+    public Order getOrder(int orderId) throws JsonProcessingException {
+        String sql = "SELECT * FROM `order` WHERE id = :orderId";
+        Map<String, Object> orderParams = new HashMap<>();
+        orderParams.put("orderId", orderId);
+        Map map = sqlUtil.getMap(sql, new MapSqlParameterSource(orderParams));
+
+        Order order = new Order();
+        order.setUserName((String) map.get("user_name"));
+        order.setUserId(Integer.parseInt(map.get("user_id").toString()));
+        order.setStatus(map.get("status").toString());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<ProductEntity> productEntities = objectMapper.readValue(map.get("product").toString(),new TypeReference<List<ProductEntity>>(){});
+        order.setProductEntities(productEntities);
+        return order;
+
+    }
+
+    public void updateOrderStatus(int orderId) {
+        String orderInsertSql = "update `order` set status=:status where id=:orderId ";
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("orderId", orderId);
+        params.put("status", "DONE");
 
 
-
+        sqlUtil.persist(orderInsertSql, new MapSqlParameterSource(params));
     }
 
    /* public void insertIntoOrderItem(int orderRequest){
@@ -89,7 +122,7 @@ public class OrderDao {
                 from inventory
                 where product_id = :productId
                 """;
-        return sqlUtil.getString(sql);
+        return sqlUtil.getString(sql, new MapSqlParameterSource(map));
     }
 
     public String getPrice(int productId) throws Exception {
@@ -100,7 +133,7 @@ public class OrderDao {
                 from product
                 where product_id = :productId
                 """;
-        return sqlUtil.getString(sql);
+        return sqlUtil.getString(sql, new MapSqlParameterSource(map));
     }
 
 
@@ -112,7 +145,7 @@ public class OrderDao {
                 from product
                 where product_id = :productId
                 """;
-        return sqlUtil.getString(sql);
+        return sqlUtil.getString(sql, new MapSqlParameterSource(map));
     }
 
     public String fetchSellerName(int productId) throws Exception {
@@ -123,31 +156,44 @@ public class OrderDao {
                 from seller s join product p on s.seller_id = p.seller_id
                 where p.product_id = :productId
                 """;
-        return sqlUtil.getString(sql);
+        return sqlUtil.getString(sql, new MapSqlParameterSource(map));
     }
 
-    public int fetchUserId(int userId) throws Exception {
+  /*  public int fetchUserId(int userId) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         String sql = """
-                select user_id 
+                select user_id
                 from user
-                where user_id = :userId
+                where user_id =:userId
                 """;
         return sqlUtil.getInteger(sql,new MapSqlParameterSource(map));
-    }
+    }*/
 
-    public String fetchUserName(int userId) throws Exception {
+    public userDto fetchUserDto(int userId) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         String sql = """
-                select user_name 
+                select user_id ,user_name
                 from user
-                where user_id = :userId
+                where user_id =:userId
                 """;
-        return sqlUtil.getString(sql);
+        return (userDto) sqlUtil.getBean(sql, map, userDto.class);
     }
 
+
+
+   /* public String fetchUserName(int userId) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        String sql = """
+                select user_name
+                from user
+                where user_id =:userId
+                """;
+        return sqlUtil.getString(sql,new MapSqlParameterSource(map));
+    }
+*/
 
 
 
