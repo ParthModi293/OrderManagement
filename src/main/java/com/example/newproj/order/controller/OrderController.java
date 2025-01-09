@@ -24,7 +24,8 @@ public class OrderController {
         ResponseBean<Object> objectResponseBean = orderService.saveOrder(orderRequest);
 //        objectResponseBean.setDisplayMessage("Order saved successfully");
 
-        return ResponseEntity.ok(objectResponseBean);
+//        return ResponseEntity.ok(objectResponseBean);
+        return new ResponseEntity<>(objectResponseBean, objectResponseBean.getRStatus());
 
     }
 
