@@ -1,8 +1,7 @@
-package com.example.newproj.controller;
+package com.example.newproj.order.controller;
 
-import com.example.newproj.model.OrderRequest;
-import com.example.newproj.model.ProductRequest;
-import com.example.newproj.service.OrderService;
+import com.example.newproj.order.model.OrderRequest;
+import com.example.newproj.order.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +28,7 @@ public class OrderController {
 
     public ResponseEntity<?> paymentRequest(@RequestBody OrderRequest orderRequest) throws Exception {
 
+        return null;
     }
 
 }

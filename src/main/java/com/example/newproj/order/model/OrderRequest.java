@@ -1,4 +1,4 @@
-package com.example.newproj.model;
+package com.example.newproj.order.model;
 
 import lombok.Data;
 

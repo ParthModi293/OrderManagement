@@ -1,16 +1,14 @@
-package com.example.newproj.dao;
+package com.example.newproj.order.dao;
 
-import com.example.newproj.model.*;
+import com.example.newproj.order.model.Order;
 import com.example.newproj.util.SqlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -34,7 +32,7 @@ public class OrderDao {
     }*/
 
 
-    public void insertIntoOrder(Order order,double totalAmount) throws JsonProcessingException {
+    public void insertIntoOrder(Order order, double totalAmount) throws JsonProcessingException {
         String orderInsertSql = "INSERT INTO order (user_name,product,user_id, total_amount,status) VALUES (:userName, :product ::json, :userId, :totalAmount, :status)";
         Map<String, Object> orderParams = new HashMap<>();
         ObjectMapper objectMapper = new ObjectMapper();

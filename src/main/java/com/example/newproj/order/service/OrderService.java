@@ -1,17 +1,13 @@
-package com.example.newproj.service;
+package com.example.newproj.order.service;
 
-import com.example.newproj.dao.OrderDao;
-import com.example.newproj.model.Order;
-import com.example.newproj.model.OrderRequest;
-import com.example.newproj.model.ProductEntity;
-import com.example.newproj.model.ProductRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.newproj.order.dao.OrderDao;
+import com.example.newproj.order.model.Order;
+import com.example.newproj.order.model.OrderRequest;
+import com.example.newproj.order.model.ProductEntity;
+import com.example.newproj.order.model.ProductRequest;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-
-import java.util.List;
 
 @Service
 public class OrderService {
@@ -35,12 +31,12 @@ public class OrderService {
 
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<OrderRequest> productRequestHttpEntity = new HttpEntity<>(orderRequest, headers);
+        HttpEntity<Object> productRequestHttpEntity = new HttpEntity<>(orderRequest, headers);
 
-        ResponseEntity<String> res = restTemplate.postForEntity(url, productRequestHttpEntity, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, productRequestHttpEntity, String.class);
 
-        if (!(res.getStatusCode().is2xxSuccessful())) {
-            return new ResponseEntity<>(, res.getStatusCode());
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            return new ResponseBean<>(HttpStatus.BAD_REQUEST, responseEntity.getBody(), responseEntity.getBody(), null);
         }
 
 
@@ -114,5 +110,12 @@ public class OrderService {
 
 
     }*/
+
+    public ResponseEntity<?> inventoryUpdate(OrderRequest orderRequest) throws Exception {
+
+
+
+
+    }
 
 }
