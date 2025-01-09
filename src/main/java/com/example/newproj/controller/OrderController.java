@@ -19,7 +19,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/save")
-    public ResponseEntity<?> saveOrder(@RequestBody OrderRequest orderRequest) {
+    public ResponseEntity<?> saveOrder(@RequestBody OrderRequest orderRequest) throws Exception {
 
             orderService.saveOrder(orderRequest);
 

@@ -1,7 +1,12 @@
 package com.example.newproj.model;
 
+import lombok.Data;
+
+@Data
+
 public class ProductRequest {
 
-    int productId;
-    int quantity;
+    private int productId;
+    private int quantity;
+
 }

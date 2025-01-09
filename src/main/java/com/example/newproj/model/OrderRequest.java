@@ -8,12 +8,8 @@ import java.util.List;
 public class OrderRequest {
 
 
-    int userId;
-   List<ProductRequest> products;
-
-
-
-
+   private int userId;
+  private List<ProductRequest> products;
 
 
 }
