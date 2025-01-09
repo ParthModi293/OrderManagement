@@ -10,6 +10,7 @@ public class OrderRequest {
 
    private int userId;
   private List<ProductRequest> products;
+  private String paymentType;
 
 
 }

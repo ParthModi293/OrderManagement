@@ -72,9 +72,12 @@ public class OrderService {
         order.setUserId(orderRequest.getUserId());
         order.setTotalAmount(totalAmount);
         order.setUserName(userName);
+        order.setStatus("Pending");
 
         // pay
         //if payment is successful order insert and minus qty from the inventory
+
+       orderDao.insertIntoOrder(order,totalAmount);
 
 
 

@@ -27,4 +27,8 @@ public class OrderController {
 
     }
 
+    public ResponseEntity<?> paymentRequest(@RequestBody OrderRequest orderRequest) throws Exception {
+
+    }
+
 }

@@ -12,5 +12,6 @@ public class Order {
     private int totalAmount;
     private String userName;
     private int userId;
+    private String status;
 
 }

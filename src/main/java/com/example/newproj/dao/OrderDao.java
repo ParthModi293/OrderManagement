@@ -2,6 +2,8 @@ package com.example.newproj.dao;
 
 import com.example.newproj.model.*;
 import com.example.newproj.util.SqlUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -32,29 +34,21 @@ public class OrderDao {
     }*/
 
 
-    public void insertIntoOrder(Order order,double totalAmount) {
-        String orderInsertSql = "INSERT INTO order (user_name, total_amount) VALUES (:userName, :totalAmount)";
+    public void insertIntoOrder(Order order,double totalAmount) throws JsonProcessingException {
+        String orderInsertSql = "INSERT INTO order (user_name,product,user_id, total_amount,status) VALUES (:userName, :product ::json, :userId, :totalAmount, :status)";
         Map<String, Object> orderParams = new HashMap<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        orderParams.put("product", objectMapper.writeValueAsString(order.getProductEntities()));
         orderParams.put("userName", order.getUserName());
+        orderParams.put("userId", order.getUserId());
+        orderParams.put("status", order.getStatus());
         orderParams.put("totalAmount", totalAmount);
 
-        int orderId = sqlUtil.persist(orderInsertSql, new MapSqlParameterSource(orderParams));
+        sqlUtil.persist(orderInsertSql, new MapSqlParameterSource(orderParams));
 
-        String productInsertSql = "INSERT INTO productEntity (order_id, product_id, product_name, seller_name, price, quantity) " +
-                "VALUES (:orderId, :productId, :productName, :sellerName, :price, :qty)";
 
-        for (ProductEntity product : order.getProductEntities()) {
-            Map<String, Object> productParams = new HashMap<>();
-            productParams.put("orderId", orderId);
-            productParams.put("productId", product.getProductId());
-            productParams.put("productName", product.getProductName());
-            productParams.put("sellerName", product.getSellerName());
-            productParams.put("price", product.getPrice());
-            productParams.put("qty", product.getQuantity());
 
-            sqlUtil.persist(productInsertSql, new MapSqlParameterSource(productParams));
-
-        }
     }
 
    /* public void insertIntoOrderItem(int orderRequest){
