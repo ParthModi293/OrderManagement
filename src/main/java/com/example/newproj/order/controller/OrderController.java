@@ -15,22 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class OrderController {
 
-
     private final OrderService orderService;
 
     @PostMapping("/save")
     public ResponseEntity<?> saveOrder(@RequestBody OrderRequest orderRequest) throws Exception {
-
         ResponseBean<Object> objectResponseBean = orderService.saveOrder(orderRequest);
-//        objectResponseBean.setDisplayMessage("Order saved successfully");
-
-//        return ResponseEntity.ok(objectResponseBean);
         return new ResponseEntity<>(objectResponseBean, objectResponseBean.getRStatus());
-
     }
-
-
-
-
 
 }

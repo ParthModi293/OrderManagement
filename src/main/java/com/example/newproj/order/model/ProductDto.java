@@ -4,9 +4,11 @@ import lombok.Data;
 
 @Data
 public class ProductDto {
-    private  int orderId;
-    private  int productId;
-    private  int quantity;
-    private int inventryId;
+
+
+
+    private int productId;
     private int price;
+    private String productName;
+    private String sellerName;
 }

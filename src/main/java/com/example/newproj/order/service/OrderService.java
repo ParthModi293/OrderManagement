@@ -1,65 +1,62 @@
 package com.example.newproj.order.service;
 
+import com.example.newproj.common.InventoryRestTemplate;
 import com.example.newproj.order.dao.OrderDao;
-import com.example.newproj.order.dto.userDto;
-import com.example.newproj.order.model.Order;
-import com.example.newproj.order.model.OrderRequest;
-import com.example.newproj.order.model.ProductEntity;
-import com.example.newproj.order.model.ProductRequest;
+import com.example.newproj.order.dto.UserDto;
+import com.example.newproj.order.model.*;
 import com.example.newproj.util.ResponseBean;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.DataInput;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
 
     private final OrderDao orderDao;
+    private final InventoryRestTemplate inventoryRestTemplate;
 
-    public OrderService(OrderDao orderDao) {
+    public OrderService(OrderDao orderDao, InventoryRestTemplate inventoryRestTemplate) {
         this.orderDao = orderDao;
+        this.inventoryRestTemplate = inventoryRestTemplate;
     }
 
     @Transactional
     public ResponseBean<Object> saveOrder(OrderRequest orderRequest) throws Exception {
-//        int s = orderDao.fetchUserId(orderRequest.getUserId());
-
-        userDto userD = orderDao.fetchUserDto(orderRequest.getUserId());
-        if (!(userD.getUserId() > 0)) {
+        UserDto userD = orderDao.fetchUserDto(orderRequest.getUserId());
+        if (userD.getUserId() < 0) {
             throw new Exception("user not found with Id: " + userD.getUserId());
         }
-
-        RestTemplate restTemplate = new RestTemplate();
+      /*  RestTemplate restTemplate = new RestTemplate();
         String url = "http://192.168.29.28:8080/inventory/validate-product";
         HttpHeaders headers = new HttpHeaders();
-
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         HttpEntity<Object> productRequestHttpEntity = new HttpEntity<>(orderRequest, headers);
-        ResponseEntity<String> responseEntity;
-try {
-   responseEntity = restTemplate.postForEntity(url, productRequestHttpEntity, String.class);
-}catch (HttpClientErrorException e){
-    ObjectMapper objectMapper = new ObjectMapper();
-   ResponseBean responseBean = objectMapper.readValue(e.getResponseBodyAs(String.class),ResponseBean.class);
-
-
-    return new ResponseBean<>(HttpStatus.BAD_REQUEST, responseBean.getDisplayMessage(), null, null);
-
-
-}
-        /*if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-            return new ResponseBean<>(HttpStatus.BAD_REQUEST, responseEntity.getBody(), responseEntity.getBody(), null);
+        try {
+            restTemplate.postForEntity(url, productRequestHttpEntity, String.class);
+        } catch (HttpClientErrorException e) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ResponseBean responseBean = objectMapper.readValue(e.getResponseBodyAs(String.class), ResponseBean.class);
+            return new ResponseBean<>(HttpStatus.BAD_REQUEST, responseBean.getDisplayMessage(), null, null);
         }*/
+
+        try {
+            inventoryRestTemplate.checkProductQuantity(orderRequest);
+        } catch (HttpClientErrorException e) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ResponseBean responseBean = objectMapper.readValue(e.getResponseBodyAs(String.class), ResponseBean.class);
+            return new ResponseBean<>(HttpStatus.BAD_REQUEST, responseBean.getDisplayMessage(), null, null);
+
+        }
 
 
         // If it is true then... Write query code to insert
@@ -67,46 +64,45 @@ try {
         int totalAmount = 0;
         Order order = new Order();
 
-//        String userName = orderDao.fetchUserName(orderRequest.getUserId());
 
-        String productName = orderDao.fetchProductName(orderRequest.getUserId());
+        List<Integer> productIds = orderRequest.getProducts().stream().map(ProductRequest::getProductId).collect(Collectors.toList());
+
+
+        List<ProductDto> productDto = orderDao.fetchProductDto(productIds);
+
+        Map<Integer, ProductDto> productmap = productDto.stream().collect(Collectors.toMap(ProductDto::getProductId, dto -> dto));
 
         List<ProductEntity> productEntityList = new ArrayList<>();
         for (ProductRequest productRequest : orderRequest.getProducts()) {
 
-            String price = orderDao.getPrice(productRequest.getProductId());
-            String sellerName = orderDao.fetchSellerName(productRequest.getProductId());
+            ProductDto product = productmap.get(productRequest.getProductId());
 
             ProductEntity productEntity = new ProductEntity();
-
-            productEntity.setProductName(productName);
+            productEntity.setProductName(product.getProductName());
             productEntity.setQuantity(productRequest.getQuantity());
-            productEntity.setPrice(Integer.parseInt(price));
+            productEntity.setPrice(product.getPrice());
             productEntity.setProductId(productRequest.getProductId());
-            productEntity.setSellerName(sellerName);
+            productEntity.setSellerName(product.getSellerName());
 
             totalAmount = totalAmount + (productEntity.getPrice() * productRequest.getQuantity());
-
             productEntityList.add(productEntity);
-
-
         }
         order.setProductEntities(productEntityList);
         order.setUserId(orderRequest.getUserId());
         order.setTotalAmount(totalAmount);
         order.setUserName(userD.getUserName());
-        order.setStatus("Pending");
+        order.setStatus(String.valueOf(OrderStatus.PENDING));
 
-        // pay
-        //if payment is successful order insert and minus qty from the inventory
+        int orderId = orderDao.insertIntoOrder(order, totalAmount);
 
-        int i = orderDao.insertIntoOrder(order, totalAmount);
+        Map<String, Integer> map = new HashMap<>();
+        map.put("orderId", orderId);
 
-//        order.setId(i);
 
-        return new ResponseBean<>(HttpStatus.OK, i);
+        return new ResponseBean<>(HttpStatus.OK, map);
 
     }
+}
 
     /*public ResponseEntity<?> checkProductQty(List<ProductRequest> productRequest) {
         try {
@@ -139,4 +135,4 @@ try {
 
 //    public ResponseEntity<?> inventoryUpdate(OrderRequest orderRequest) throws Exception {
 
-}
+

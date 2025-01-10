@@ -1,7 +1,8 @@
 package com.example.newproj.order.dao;
 
-import com.example.newproj.order.dto.userDto;
+import com.example.newproj.order.dto.UserDto;
 import com.example.newproj.order.model.Order;
+import com.example.newproj.order.model.ProductDto;
 import com.example.newproj.order.model.ProductEntity;
 import com.example.newproj.util.SqlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -9,7 +10,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -81,22 +81,6 @@ public class OrderDao {
 
         sqlUtil.persist(orderInsertSql, new MapSqlParameterSource(params));
     }
-
-   /* public void insertIntoOrderItem(int orderRequest){
-
-
-
-        String sql="INSERT INTO order_item(order_id,product_id,inventory_id,price,qty) VALUES (:orderId,:productId,:inventoryId,:price,:qty)";
-
-        Map<String, Object> param = new HashMap<>();
-        param.put("seller", orderRequest.getSellerId());
-
-        sqlUtil.persist(sql, new MapSqlParameterSource(param));
-    }*/
-
-    // New class 4 param
-    //dto
-
 /*    public List<ProductDto> getProductDto(OrderRequest orderRequest) throws Exception {
 
         for(ProductRequest od: orderRequest.getProducts()){
@@ -170,7 +154,7 @@ public class OrderDao {
         return sqlUtil.getInteger(sql,new MapSqlParameterSource(map));
     }*/
 
-    public userDto fetchUserDto(int userId) throws Exception {
+    public UserDto fetchUserDto(int userId) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         String sql = """
@@ -178,7 +162,18 @@ public class OrderDao {
                 from user
                 where user_id =:userId
                 """;
-        return (userDto) sqlUtil.getBean(sql, map, userDto.class);
+        return (UserDto) sqlUtil.getBean(sql, map, UserDto.class);
+    }
+
+    public List<ProductDto> fetchProductDto(List<Integer> productIds) throws IllegalAccessException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("productIds", productIds);
+        String sql = """
+                select p.product_id as productId ,p.product_name as productName,s.seller_name as sellerName
+                from product p join seller s on s.seller_id = p.seller_id where p.product_id in (:productIds)
+                """;
+
+        return  sqlUtil.getBeanList(sql, map, new ProductDto());
     }
 
 
