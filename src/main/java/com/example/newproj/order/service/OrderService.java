@@ -42,21 +42,6 @@ public class OrderService {
         }
 
         UserDto userD = orderDao.fetchUserDto(orderRequest.getUserId());
-        if (userD.getUserId() < 0) {
-            throw new Exception("user not found with Id: " + userD.getUserId());
-        }
-      /*  RestTemplate restTemplate = new RestTemplate();
-        String url = "http://192.168.29.28:8080/inventory/validate-product";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Object> productRequestHttpEntity = new HttpEntity<>(orderRequest, headers);
-        try {
-            restTemplate.postForEntity(url, productRequestHttpEntity, String.class);
-        } catch (HttpClientErrorException e) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            ResponseBean responseBean = objectMapper.readValue(e.getResponseBodyAs(String.class), ResponseBean.class);
-            return new ResponseBean<>(HttpStatus.BAD_REQUEST, responseBean.getDisplayMessage(), null, null);
-        }*/
 
         try {
             inventoryRestTemplate.checkProductQuantity(orderRequest);
