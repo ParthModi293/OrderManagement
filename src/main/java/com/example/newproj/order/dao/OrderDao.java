@@ -4,6 +4,8 @@ import com.example.newproj.order.dto.UserDto;
 import com.example.newproj.order.model.Order;
 import com.example.newproj.order.model.ProductDto;
 import com.example.newproj.order.model.ProductEntity;
+import com.example.newproj.payment.model.PaymentStatus;
+import com.example.newproj.payment.model.PaymentType;
 import com.example.newproj.util.SqlUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,19 +24,6 @@ public class OrderDao {
     @Autowired
     private SqlUtil sqlUtil;
 
- /*   public void insertIntoOrder(OrderRequest orderRequest,double totalAmount){
-
-        String sql = "INSERT INTO order_header(seller,user,total_amount) VALUES (:seller,:user,:total_amount)";
-
-
-        Map<String, Object> param = new HashMap<>();
-        param.put("seller", orderRequest.getSellerId());
-        param.put("user", orderRequest.getUserId());
-        param.put("total_amount", totalAmount);
-        int orderId= sqlUtil.persistKey(sql, new MapSqlParameterSource(param));
-
-
-    }*/
 
 
     public int insertIntoOrder(Order order, double totalAmount) throws JsonProcessingException {
@@ -76,7 +65,7 @@ public class OrderDao {
         Map<String, Object> params = new HashMap<>();
 
         params.put("orderId", orderId);
-        params.put("status", "DONE");
+        params.put("status", PaymentStatus.DONE);
 
 
         sqlUtil.persist(orderInsertSql, new MapSqlParameterSource(params));
@@ -143,7 +132,7 @@ public class OrderDao {
         return sqlUtil.getString(sql, new MapSqlParameterSource(map));
     }
 
-  /*  public int fetchUserId(int userId) throws Exception {
+    public int fetchUserId(int userId) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         String sql = """
@@ -152,9 +141,9 @@ public class OrderDao {
                 where user_id =:userId
                 """;
         return sqlUtil.getInteger(sql,new MapSqlParameterSource(map));
-    }*/
+    }
 
-    public UserDto fetchUserDto(int userId) throws Exception {
+    public UserDto fetchUserDto(int userId) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         String sql = """

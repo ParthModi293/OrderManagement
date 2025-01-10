@@ -6,6 +6,6 @@ import lombok.Data;
 public class PaymentRequest {
 
     private int orderId;
-    private payment_type type;
-    private String status;
+    private PaymentType type;
+    private PaymentStatus status;
 }

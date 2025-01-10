@@ -3,6 +3,7 @@ package com.example.newproj.payment.validation;
 import com.example.newproj.payment.dao.PaymentDao;
 import com.example.newproj.payment.domain.Payment;
 import com.example.newproj.payment.model.PaymentRequest;
+import com.example.newproj.payment.model.PaymentStatus;
 import com.example.newproj.util.ResponseBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class PaymentRequestValidation {
         if (payment != null) {
             return new ResponseBean<>(HttpStatus.BAD_REQUEST, "Payment request already avalaible", "Payment request already avalaible", null);
         }
-        if (!(paymentRequest.getStatus() != null && paymentRequest.getStatus().equals("PASS"))) {
+        if (!(paymentRequest.getStatus() != null && paymentRequest.getStatus().equals(PaymentStatus.PASS))) {
             return new ResponseBean<>(HttpStatus.BAD_REQUEST, "Payment status is fail", "Payment status is fail", null);
         }
         return new ResponseBean<>(HttpStatus.OK, "OK");

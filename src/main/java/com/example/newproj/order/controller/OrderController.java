@@ -19,7 +19,7 @@ public class OrderController {
 
     @PostMapping("/save")
     public ResponseEntity<?> saveOrder(@RequestBody OrderRequest orderRequest) throws Exception {
-        ResponseBean<Object> objectResponseBean = orderService.saveOrder(orderRequest);
+        ResponseBean<?> objectResponseBean = orderService.saveOrder(orderRequest);
         return new ResponseEntity<>(objectResponseBean, objectResponseBean.getRStatus());
     }
 

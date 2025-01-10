@@ -1,11 +1,8 @@
 package com.example.newproj.payment.dao;
 
-import com.example.newproj.order.model.Order;
 import com.example.newproj.payment.domain.Payment;
 import com.example.newproj.payment.model.PaymentRequest;
 import com.example.newproj.util.SqlUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 

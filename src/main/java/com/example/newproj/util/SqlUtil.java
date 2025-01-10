@@ -294,7 +294,8 @@ public class SqlUtil {
             NamedParameterJdbcTemplate namedTempalte = new NamedParameterJdbcTemplate(jdbcTemplate);
             return namedTempalte.queryForObject(sql, parmaMap, Integer.class);
         } catch (DataAccessException ex) {
-            throw ex;
+            return 0;
+//            throw ex;
         }
     }
 

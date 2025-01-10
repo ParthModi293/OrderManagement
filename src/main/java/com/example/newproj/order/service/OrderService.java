@@ -4,14 +4,14 @@ import com.example.newproj.common.InventoryRestTemplate;
 import com.example.newproj.order.dao.OrderDao;
 import com.example.newproj.order.dto.UserDto;
 import com.example.newproj.order.model.*;
+import com.example.newproj.order.validation.OrderValidation;
 import com.example.newproj.util.ResponseBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
-import lombok.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,14 +24,23 @@ public class OrderService {
 
     private final OrderDao orderDao;
     private final InventoryRestTemplate inventoryRestTemplate;
+    private final OrderValidation orderValidation;
 
-    public OrderService(OrderDao orderDao, InventoryRestTemplate inventoryRestTemplate) {
+    public OrderService(OrderDao orderDao, InventoryRestTemplate inventoryRestTemplate, OrderValidation orderValidation) {
         this.orderDao = orderDao;
         this.inventoryRestTemplate = inventoryRestTemplate;
+        this.orderValidation = orderValidation;
     }
 
     @Transactional
-    public ResponseBean<Object> saveOrder(OrderRequest orderRequest) throws Exception {
+    public ResponseBean<?> saveOrder(OrderRequest orderRequest) throws Exception {
+
+        ResponseBean<Void> voidResponseBean = orderValidation.userIdValidation(orderRequest);
+
+        if(voidResponseBean.getRStatus()!=HttpStatus.OK){
+            return voidResponseBean;
+        }
+
         UserDto userD = orderDao.fetchUserDto(orderRequest.getUserId());
         if (userD.getUserId() < 0) {
             throw new Exception("user not found with Id: " + userD.getUserId());
@@ -58,14 +67,13 @@ public class OrderService {
 
         }
 
-
         // If it is true then... Write query code to insert
 
         int totalAmount = 0;
         Order order = new Order();
 
-
-        List<Integer> productIds = orderRequest.getProducts().stream().map(ProductRequest::getProductId).collect(Collectors.toList());
+        List<Integer> productIds =
+                orderRequest.getProducts().stream().map(ProductRequest::getProductId).collect(Collectors.toList());
 
 
         List<ProductDto> productDto = orderDao.fetchProductDto(productIds);
@@ -103,36 +111,5 @@ public class OrderService {
 
     }
 }
-
-    /*public ResponseEntity<?> checkProductQty(List<ProductRequest> productRequest) {
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-
-            String url = "";
-            HttpHeaders headers = new HttpHeaders();
-
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            ProductRequest productRequest1 = new ProductRequest();
-            for (ProductRequest pr : productRequest) {
-                productRequest1.setProductId(pr.getProductId());
-                productRequest1.setQuantity(pr.getQuantity());
-            }
-
-            HttpEntity<ProductRequest> productRequestHttpEntity = new HttpEntity<>(productRequest1, headers);
-
-
-            ResponseEntity<?> res = restTemplate.postForEntity(url, productRequestHttpEntity, ResponseEntity.class);
-
-            return new ResponseEntity<>(res.getBody(), res.getStatusCode());
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-
-    }*/
-
-//    public ResponseEntity<?> inventoryUpdate(OrderRequest orderRequest) throws Exception {
 
 
