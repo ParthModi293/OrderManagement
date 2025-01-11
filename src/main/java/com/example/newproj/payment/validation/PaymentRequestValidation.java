@@ -22,8 +22,8 @@ public class PaymentRequestValidation {
         if (paymentRequest.getOrderId() <= 0) {
             return new ResponseBean<>(HttpStatus.BAD_REQUEST, "Please enter valid order id", "Please enter valid order id", null);
         }
-        Payment payment = paymentDao.getPayment(paymentRequest.getOrderId());
-        if (payment != null) {
+        int paymentCount = paymentDao.getPayment(paymentRequest.getOrderId());
+        if (paymentCount > 0) {
             return new ResponseBean<>(HttpStatus.BAD_REQUEST, "Payment request already avalaible", "Payment request already avalaible", null);
         }
         if (!(paymentRequest.getStatus() != null && paymentRequest.getStatus().equals(PaymentStatus.PASS))) {

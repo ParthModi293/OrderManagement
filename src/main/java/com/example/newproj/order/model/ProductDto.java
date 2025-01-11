@@ -11,4 +11,5 @@ public class ProductDto {
     private int price;
     private String productName;
     private String sellerName;
+    private String sellerId;
 }

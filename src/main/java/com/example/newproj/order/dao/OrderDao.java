@@ -65,7 +65,7 @@ public class OrderDao {
         Map<String, Object> params = new HashMap<>();
 
         params.put("orderId", orderId);
-        params.put("status", PaymentStatus.DONE);
+        params.put("status", PaymentStatus.DONE.toString());
 
 
         sqlUtil.persist(orderInsertSql, new MapSqlParameterSource(params));
@@ -154,11 +154,22 @@ public class OrderDao {
         return (UserDto) sqlUtil.getBean(sql, map, UserDto.class);
     }
 
-    public List<ProductDto> fetchProductDto(List<Integer> productIds) throws IllegalAccessException {
+    public Order fetchOrder(int orderId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("orderId", orderId);
+        String sql = """
+                select *
+                from `order`
+                where id =:orderId
+                """;
+        return (Order) sqlUtil.getBean(sql, map, Order.class);
+    }
+
+    public List<ProductDto> fetchProductDto(List<Integer> productIds) {
         Map<String, Object> map = new HashMap<>();
         map.put("productIds", productIds);
         String sql = """
-                select p.product_id as productId ,p.product_name as productName,s.seller_name as sellerName
+                select p.product_id as productId ,p.product_name as productName,s.seller_name as sellerName, p.price as price,s.seller_id as sellerId
                 from product p join seller s on s.seller_id = p.seller_id where p.product_id in (:productIds)
                 """;
 

@@ -4,6 +4,7 @@ import com.example.newproj.payment.domain.Payment;
 import com.example.newproj.payment.model.PaymentRequest;
 import com.example.newproj.util.SqlUtil;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -24,17 +25,17 @@ public class PaymentDao {
 
         params.put("orderId", paymentRequest.getOrderId());
         params.put("type", paymentRequest.getType().toString());
-        params.put("status", paymentRequest.getStatus());
+        params.put("status", paymentRequest.getStatus().toString());
 
         sqlUtil.persist(orderInsertSql, new MapSqlParameterSource(params));
     }
 
-    public Payment getPayment(int orderId) {
-        String sql = "select * from payment where order_id=:orderId";
+    public int getPayment(int orderId) {
+        String sql = "select count(*) from payment where order_id=:orderId";
         Map<String, Object> params = new HashMap<>();
         params.put("orderId", orderId);
 
-        return (Payment) sqlUtil.getBean(sql,params,Payment.class);
+        return  sqlUtil.getInteger(sql, new MapSqlParameterSource(params));
     }
 
 

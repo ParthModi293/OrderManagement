@@ -42,9 +42,11 @@ public class InventoryRestTemplate {
 
     }
 
-    public ResponseBean<Object> decreaseProductQuantity(PaymentRequest paymentRequest) throws JsonProcessingException {
+    public ResponseBean<Object> decreaseProductQuantity(
+          PaymentRequest paymentRequest
+    ) throws JsonProcessingException {
 
-        Order order = orderDao.getOrder(paymentRequest.getOrderId());
+       Order order = orderDao.getOrder(paymentRequest.getOrderId());
 
         RestTemplate restTemplate = new RestTemplate();
         String requestUrl = url + "/inventory/update-qty";

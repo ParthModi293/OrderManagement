@@ -8,4 +8,5 @@ public class PaymentRequest {
     private int orderId;
     private PaymentType type;
     private PaymentStatus status;
+    private String currency;
 }
